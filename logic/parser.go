@@ -1,6 +1,9 @@
 package logic
 
-import "fmt"
+import (
+	"fmt"
+	"math/rand"
+)
 
 func ParseBoolState(flatState []bool, xSize int, ySize int) ([][]bool, error) {
 	if len(flatState) != xSize*ySize {
@@ -26,14 +29,25 @@ func ParseIntState(flatState []uint8, xSize int, ySize int) ([][]bool, error) {
 	return ParseBoolState(boolState, xSize, ySize)
 }
 
-func InitState(xSize int, ySize int) [][]bool {
-	// Allocate the top-level slice, the same as before.
+func InitEmptyState(xSize int, ySize int) [][]bool {
 	picture := make([][]bool, ySize) // One row per unit of y.
 	// Allocate one large slice to hold all the pixels.
-	pixels := make([]bool, xSize*ySize) // Has type []uint8 even though picture is [][]uint8.
+	pixels := make([]bool, xSize*ySize)
 	// Loop over the rows, slicing each row from the front of the remaining pixels slice.
 	for i := range picture {
 		picture[i], pixels = pixels[:xSize], pixels[xSize:]
+	}
+	return picture
+}
+
+func InitRandomState(xSize int, ySize int) [][]bool {
+	picture := make([][]bool, ySize) // One row per unit of y.
+	// Loop over the rows, slicing each row from the front of the remaining pixels slice.
+	for row := range ySize {
+		picture[row] = make([]bool, xSize)
+		for col := range ySize {
+			picture[row][col] = rand.Intn(2) == 0
+		}
 	}
 	return picture
 }

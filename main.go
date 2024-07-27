@@ -6,18 +6,17 @@ import (
 	"github.com/lucb31/conway-go/logic"
 )
 
-const xSize, ySize = 3, 3
+const xSize, ySize = 10, 10
 
 func main() {
-	state, err := logic.ParseBoolState([]bool{false, true, false, false, true, false, false, true, false}, xSize, ySize)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	fmt.Println("Hello world")
+	state := logic.InitRandomState(xSize, ySize)
 	logic.PrintState(state)
-	state, err = logic.Epoch(state)
-	if err != nil {
-		fmt.Println(err.Error())
+	for epoch := range 10 {
+		fmt.Println("---", epoch, "---")
+		state, err := logic.Epoch(state)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		logic.PrintState(state)
 	}
-	logic.PrintState(state)
 }
