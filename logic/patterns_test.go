@@ -22,10 +22,11 @@ func runTestWithStateData(t *testing.T, states [][]uint8, xSize int, ySize int) 
 	if err != nil {
 		t.Fatal(err.Error())
 	}
+	stateObj := State{xSize, ySize, state}
 	// Calculate & compare states starting at epoch 1
 	for epoch := 1; epoch < len(states); epoch++ {
 		fmt.Printf("Epoch %d\n", epoch)
-		nextState, err := Epoch(state)
+		err := stateObj.Epoch()
 		if err != nil {
 			t.Fatal(err.Error())
 		}
@@ -34,15 +35,13 @@ func runTestWithStateData(t *testing.T, states [][]uint8, xSize int, ySize int) 
 		if err != nil {
 			t.Fatal(err.Error())
 		}
-		_, err = stateEqual(expected, nextState)
+		_, err = stateEqual(expected, stateObj.Vals)
 		if err != nil {
 			PrintState(expected)
 			fmt.Println("---")
-			PrintState(nextState)
+			PrintState(stateObj.Vals)
 			t.Fatal(err.Error())
 		}
-		// Overwrite state to be used in next iteration
-		state = nextState
 	}
 }
 

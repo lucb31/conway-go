@@ -40,16 +40,16 @@ func InitEmptyState(xSize int, ySize int) [][]bool {
 	return picture
 }
 
-func InitRandomState(xSize int, ySize int) [][]bool {
+func InitRandomState(xSize int, ySize int) State {
 	picture := make([][]bool, ySize) // One row per unit of y.
 	// Loop over the rows, slicing each row from the front of the remaining pixels slice.
 	for row := range ySize {
 		picture[row] = make([]bool, xSize)
 		for col := range ySize {
-			picture[row][col] = rand.Intn(2) == 0
+			picture[row][col] = rand.Intn(10) == 0
 		}
 	}
-	return picture
+	return State{xSize, ySize, picture}
 }
 
 func PrintState(state [][]bool) {

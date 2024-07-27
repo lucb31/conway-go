@@ -2,31 +2,25 @@ package logic
 
 import (
 	"errors"
-	"log/slog"
 )
 
 var InvalidStateDimensions = errors.New("Invalid state dimensions")
-var logger = slog.Default()
 
-func calcNeighbors(state [][]bool, row int, col int) (int, error) {
-	if len(state) < 1 {
-		return 0, InvalidStateDimensions
-	}
-	xSize, ySize := len(state), len(state[0])
+type State struct {
+	xSize int
+	ySize int
+	Vals  [][]bool
+}
+
+func (s *State) calcNeighbors(row int, col int) (int, error) {
 	neighbors := 0
-	for r := max(0, row-1); r < min(xSize, row+2); r++ {
-		for c := max(0, col-1); c < min(ySize, col+2); c++ {
-			logger.Debug(
-				"Calculating cell neighbors",
-				slog.Int("row", r),
-				slog.Int("col", c),
-				slog.Bool("state", state[r][c]),
-			)
+	for r := max(0, row-1); r < min(s.ySize, row+2); r++ {
+		for c := max(0, col-1); c < min(s.xSize, col+2); c++ {
 			// Ignore myself
 			if r == row && c == col {
 				continue
 			}
-			if state[r][c] {
+			if s.Vals[r][c] {
 				neighbors++
 			}
 		}
@@ -37,36 +31,30 @@ func calcNeighbors(state [][]bool, row int, col int) (int, error) {
 func calcNextState(alive bool, neighbors int) bool {
 	if alive {
 		if neighbors < 2 {
-			logger.Debug("Cell dies by underpopulation")
 			return false
-		}
-		if neighbors > 3 {
-			logger.Debug("Cell dies by overpopulation")
+		} else if neighbors > 3 {
 			return false
 		}
 	} else if neighbors == 3 {
-		logger.Debug("Cell spawned by reproduction")
 		return true
 	}
-	logger.Debug("Cell survives")
 	// Do nothing
 	return alive
 }
 
-func Epoch(state [][]bool) ([][]bool, error) {
-	xSize, ySize := len(state), len(state[0])
-	nextState := InitEmptyState(xSize, ySize)
-	for row := range xSize {
-		for col := range ySize {
+func (s *State) Epoch() error {
+	nextState := InitEmptyState(s.xSize, s.ySize)
+	for row := 0; row < s.ySize; row++ {
+		for col := 0; col < s.xSize; col++ {
 			// Check neighbors
-			neighbors, err := calcNeighbors(state, row, col)
+			neighbors, err := s.calcNeighbors(row, col)
 			if err != nil {
-				return [][]bool{}, err
+				return err
 			}
-			// fmt.Printf("Cell [%d][%d] has %d neighbors\n", row, col, neighbors)
 			// Update state
-			nextState[row][col] = calcNextState(state[row][col], neighbors)
+			nextState[row][col] = calcNextState(s.Vals[row][col], neighbors)
 		}
 	}
-	return nextState, nil
+	s.Vals = nextState
+	return nil
 }
